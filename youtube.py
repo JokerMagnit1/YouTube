@@ -31,7 +31,7 @@ class YouTubeToMP3Mod(loader.Module):
                     'preferredcodec': 'mp3',
                     'preferredquality': '192',
                 }],
-              'cookiesfrombrowser': ('chrome',)
+              'cookiesfrombrowser': ('chrome', 'default'),
             }
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -71,7 +71,21 @@ class YouTubeToMP3Mod(loader.Module):
                     'preferredquality': '192',
                 }],
                 'extract_flat': True,
+                'cookiesfrombrowser': ('chrome', 'default'),
             }
+
+            with ytdlp.YoutubeDL(ydlopts) as ydl:
+                playlistinfo = ydl.extractinfo(url, download=False)
+                entries = playlist_info.get("entries", [])
+
+            # потом просто убираем extract_flat и добавляем playlistend
+            ydlopts.pop('extractflat')
+            ydlopts['playlistend'] = downloadcount
+
+            # cookies остаются, их заново прописывать не нужно
+
+            with ytdlp.YoutubeDL(ydlopts) as ydl:
+            ydl.download([url])
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 playlist_info = ydl.extract_info(url, download=False)
