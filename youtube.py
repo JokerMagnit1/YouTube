@@ -47,83 +47,64 @@ class YouTubeToMP3Mod(loader.Module):
             await message.edit(f"❌ <b>Ошибка:</b> {e}")
 
     async def ytplmp3cmd(self, message: Message):
-        """<ссылка> [число] - скачивает mp3 из плейлиста YouTube. Число - количество загружаемых mp3"""
-        args = utils.get_args_raw(message)
-        if not args:
-            await message.edit("❌ <b>Укажи ссылку на плейлист YouTube.</b>")
+    """<ссылка> [число] - скачивает mp3 из плейлиста YouTube. Число - количество загружаемых mp3"""
+    args = utils.get_args_raw(message)
+    if not args:
+        await message.edit("❌ <b>Укажи ссылку на плейлист YouTube.</b>")
+        return
+    
+    args = args.split()
+    url = args[0].strip()
+    limit = int(args[1]) if len(args) > 1 else None
+
+    await message.edit("⏳ <b>Проверяю плейлист...</b>")
+
+    try:
+        output_path = "downloads"
+        os.makedirs(output_path, exist_ok=True)
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': f'{output_path}/%(title)s.%(ext)s',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'extract_flat': True,
+            'cookiesfrombrowser': ('chrome', 'default'),  # можно firefox/edge
+        }
+
+        # Получаем список видео
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            playlist_info = ydl.extract_info(url, download=False)
+            entries = playlist_info.get("entries", [])
+            total_videos = len(entries)
+
+        if limit is not None and (limit < 1 or limit > total_videos):
+            await message.edit(f"❌ <b>Ошибка:</b> число треков превышает количество видео в плейлисте ({total_videos}).")
             return
-        
-        args = args.split()
-        url = args[0].strip()
-        limit = int(args[1]) if len(args) > 1 else None
 
-        await message.edit("⏳ <b>Проверяю плейлист...</b>")
+        download_count = limit if limit else total_videos
+        await message.edit(f"⏳ <b>Загружаю {download_count} треков из плейлиста...</b>")
 
-        try:
-            output_path = "downloads"
-            os.makedirs(output_path, exist_ok=True)
-            ydl_opts = {
-                'format': 'bestaudio/best',
-                'outtmpl': f'{output_path}/%(title)s.%(ext)s',
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192',
-                }],
-                'extract_flat': True,
-                'cookiesfrombrowser': ('chrome', 'default'),
-            }
+        # Настройки для загрузки
+        ydl_opts.pop('extract_flat')
+        ydl_opts['playlistend'] = download_count
 
-            with ytdlp.YoutubeDL(ydlopts) as ydl:
-                playlistinfo = ydl.extractinfo(url, download=False)
-                entries = playlist_info.get("entries", [])
-
-            # потом просто убираем extract_flat и добавляем playlistend
-            ydlopts.pop('extractflat')
-            ydlopts['playlistend'] = downloadcount
-
-            # cookies остаются, их заново прописывать не нужно
-
-            with ytdlp.YoutubeDL(ydlopts) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
 
-            for file in os.listdir(output_path):
-                if file.endswith(".mp3"):
-                    await message.client.send_file(
-                        message.chat_id,
-                        f"{output_path}/{file}",
-                        caption=f"🎵 <b>Трек:</b> {file}",
-                        parse_mode="html"
-                    )
-                    os.remove(f"{output_path}/{file}")
+        # Отправляем треки и удаляем
+        for file in os.listdir(output_path):
+            if file.endswith(".mp3"):
+                await message.client.send_file(
+                    message.chat_id,
+                    f"{output_path}/{file}",
+                    caption=f"🎵 <b>Трек:</b> {file}",
+                    parse_mode="html"
+                )
+                os.remove(f"{output_path}/{file}")
 
         await message.edit(f"✅ <b>Загрузка завершена. Треков: {download_count}.</b>")
-
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                playlist_info = ydl.extract_info(url, download=False)
-                entries = playlist_info.get("entries", [])
-                total_videos = len(entries)
-
-                if limit is not None and (limit < 1 or limit > total_videos):
-                    await message.edit(f"❌ <b>Ошибка:</b> число треков превышает количество видео в плейлисте ({total_videos}).")
-                    return
-
-                download_count = limit if limit else total_videos
-                await message.edit(f"⏳ <b>Загружаю {download_count} треков из плейлиста...</b>")
-
-                ydl_opts.pop('extract_flat')  # Убираем, чтобы загружать файлы
-                ydl_opts['playlistend'] = download_count
-
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    ydl.download([url])
-
-                for file in os.listdir(output_path):
-                    if file.endswith(".mp3"):
-                        await message.client.send_file(
-                            message.chat_id, f"{output_path}/{file}", caption=f"🎵 <b>Трек:</b> {file}", parse_mode="html"
-                        )
-                        os.remove(f"{output_path}/{file}")
-                        
-                await message.edit(f"✅ <b>Загрузка завершена. Треков: {download_count}.</b>")
-        except Exception as e:
-            await message.edit(f"❌ <b>Ошибка:</b> {e}")
+    except Exception as e:
+        await message.edit(f"❌ <b>Ошибка:</b> {e}")
