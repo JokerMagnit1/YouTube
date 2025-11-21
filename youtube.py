@@ -31,7 +31,7 @@ class YouTubeToMP3Mod(loader.Module):
                     'preferredcodec': 'mp3',
                     'preferredquality': '192',
                 }],
-              'cookiefile': 'cookies.txt',  # путь к cookies
+              'ignoreerrors': True
             }
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
