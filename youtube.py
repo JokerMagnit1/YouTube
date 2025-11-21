@@ -47,11 +47,11 @@ class YouTubeToMP3Mod(loader.Module):
             await message.edit(f"❌ <b>Ошибка:</b> {e}")
 
    async def ytplmp3cmd(self, message: Message):
-    """<ссылка> [число] - скачивает mp3 из плейлиста YouTube. Число - количество загружаемых mp3"""
-    args = utils.get_args_raw(message)
-    if not args:
-        await message.edit("❌ <b>Укажи ссылку на плейлист YouTube.</b>")
-        return
+        """<ссылка> [число] - скачивает mp3 из плейлиста YouTube. Число - количество загружаемых mp3"""
+        args = utils.get_args_raw(message)
+        if not args:
+            await message.edit("❌ <b>Укажи ссылку на плейлист YouTube.</b>")
+            return
     # дальше идёт тело функции с правильными отступами
 
     
