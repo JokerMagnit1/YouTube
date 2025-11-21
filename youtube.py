@@ -87,4 +87,4 @@ class YouTubeToMP3Mod(loader.Module):
                 await message.edit(
                     f"❌ <b>Ошибка:</b> число треков превышает количество видео в плейлисте ({total_videos})."
                 )
-                return
+                    return
