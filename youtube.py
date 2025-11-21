@@ -85,4 +85,5 @@ class YouTubeToMP3Mod(loader.Module):
 
             if limit is not None and (limit < 1 or limit > total_videos):
                 await message.edit(
-                    f"❌ <b>Ошибка:</b> число треков превышает количество видео в плейлисте ({total_videos}).")
+                    f"❌ <b>Ошибка:</b> число треков превышает количество видео в плейлисте ({total_videos})."
+                )
