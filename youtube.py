@@ -1,4 +1,4 @@
-#meta developer: @thisLyomi & @AmekaMods
+#meta developer: @JokerMagnit1
 
 from telethon.tl.types import Message
 import os
@@ -31,7 +31,7 @@ class YouTubeToMP3Mod(loader.Module):
                     'preferredcodec': 'mp3',
                     'preferredquality': '192',
                 }],
-              'ignoreerrors': True
+              'cookiesfrombrowser': ('chrome',)
             }
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
