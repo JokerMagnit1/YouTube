@@ -10,12 +10,13 @@ class YouTubeToMP3Mod(loader.Module):
     """🎵 Скачивает mp3 из видео и плейлистов YouTube"""
     strings = {"name": "YouTubeToMP3"}
 
-    async def ytmp3cmd(self, message: Message):
-        """<ссылка> - скачивает mp3 с YouTube"""
+    async def ytplmp3cmd(self, message: Message):
+        """<ссылка> [число] - скачивает mp3 из плейлиста YouTube"""
         args = utils.get_args_raw(message)
         if not args:
-            await message.edit("❌ <b>Укажи ссылку на видео с YouTube.</b>")
+            await message.edit("❌ <b>Укажи ссылку на плейлист YouTube.</b>")
             return
+        # дальше тело функции
         
         url = args.strip()
         await message.edit("⏳ <b>Загружаю MP3...</b>")
