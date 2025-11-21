@@ -74,7 +74,7 @@ class YouTubeToMP3Mod(loader.Module):
                     'preferredquality': '192',
                 }],
                 'extract_flat': True,
-                'cookiesfrombrowser': ('chrome', 'default'),
+                'cookiesfrombrowser': ('chrome', 'Default')
             }
 
             # Получаем список видео
