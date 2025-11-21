@@ -46,12 +46,14 @@ class YouTubeToMP3Mod(loader.Module):
         except Exception as e:
             await message.edit(f"❌ <b>Ошибка:</b> {e}")
 
-    async def ytplmp3cmd(self, message: Message):
+   async def ytplmp3cmd(self, message: Message):
     """<ссылка> [число] - скачивает mp3 из плейлиста YouTube. Число - количество загружаемых mp3"""
     args = utils.get_args_raw(message)
     if not args:
         await message.edit("❌ <b>Укажи ссылку на плейлист YouTube.</b>")
         return
+    # дальше идёт тело функции с правильными отступами
+
     
     args = args.split()
     url = args[0].strip()
