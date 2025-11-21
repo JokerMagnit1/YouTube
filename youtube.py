@@ -87,6 +87,18 @@ class YouTubeToMP3Mod(loader.Module):
             with ytdlp.YoutubeDL(ydlopts) as ydl:
             ydl.download([url])
 
+            for file in os.listdir(output_path):
+                if file.endswith(".mp3"):
+                    await message.client.send_file(
+                        message.chat_id,
+                        f"{output_path}/{file}",
+                        caption=f"🎵 <b>Трек:</b> {file}",
+                        parse_mode="html"
+                    )
+                    os.remove(f"{output_path}/{file}")
+
+        await message.edit(f"✅ <b>Загрузка завершена. Треков: {download_count}.</b>")
+
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 playlist_info = ydl.extract_info(url, download=False)
                 entries = playlist_info.get("entries", [])
