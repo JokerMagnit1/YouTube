@@ -55,58 +55,58 @@ class YouTubeToMP3Mod(loader.Module):
     # дальше идёт тело функции с правильными отступами
 
     
-    args = args.split()
-    url = args[0].strip()
-    limit = int(args[1]) if len(args) > 1 else None
+        args = args.split()
+        url = args[0].strip()
+        limit = int(args[1]) if len(args) > 1 else None
 
-    await message.edit("⏳ <b>Проверяю плейлист...</b>")
+        await message.edit("⏳ <b>Проверяю плейлист...</b>")
 
-    try:
-        output_path = "downloads"
-        os.makedirs(output_path, exist_ok=True)
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'outtmpl': f'{output_path}/%(title)s.%(ext)s',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-            'extract_flat': True,
-            'cookiesfrombrowser': ('chrome', 'default'),  # можно firefox/edge
-        }
+        try:
+            output_path = "downloads"
+            os.makedirs(output_path, exist_ok=True)
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'outtmpl': f'{output_path}/%(title)s.%(ext)s',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+                'extract_flat': True,
+                'cookiesfrombrowser': ('chrome', 'default'),  # можно firefox/edge
+            }
 
-        # Получаем список видео
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            playlist_info = ydl.extract_info(url, download=False)
-            entries = playlist_info.get("entries", [])
-            total_videos = len(entries)
+            # Получаем список видео
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                playlist_info = ydl.extract_info(url, download=False)
+                entries = playlist_info.get("entries", [])
+                total_videos = len(entries)
 
-        if limit is not None and (limit < 1 or limit > total_videos):
-            await message.edit(f"❌ <b>Ошибка:</b> число треков превышает количество видео в плейлисте ({total_videos}).")
-            return
+            if limit is not None and (limit < 1 or limit > total_videos):
+                await message.edit(f"❌ <b>Ошибка:</b> число треков превышает количество видео в плейлисте ({total_videos}).")
+                return
 
-        download_count = limit if limit else total_videos
-        await message.edit(f"⏳ <b>Загружаю {download_count} треков из плейлиста...</b>")
+            download_count = limit if limit else total_videos
+            await message.edit(f"⏳ <b>Загружаю {download_count} треков из плейлиста...</b>")
 
-        # Настройки для загрузки
-        ydl_opts.pop('extract_flat')
-        ydl_opts['playlistend'] = download_count
+            # Настройки для загрузки
+            ydl_opts.pop('extract_flat')
+            ydl_opts['playlistend'] = download_count
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
 
-        # Отправляем треки и удаляем
-        for file in os.listdir(output_path):
-            if file.endswith(".mp3"):
-                await message.client.send_file(
-                    message.chat_id,
-                    f"{output_path}/{file}",
-                    caption=f"🎵 <b>Трек:</b> {file}",
-                    parse_mode="html"
-                )
-                os.remove(f"{output_path}/{file}")
+            # Отправляем треки и удаляем
+            for file in os.listdir(output_path):
+                if file.endswith(".mp3"):
+                    await message.client.send_file(
+                        message.chat_id,
+                        f"{output_path}/{file}",
+                        caption=f"🎵 <b>Трек:</b> {file}",
+                        parse_mode="html"
+                    )
+                    os.remove(f"{output_path}/{file}")
 
-        await message.edit(f"✅ <b>Загрузка завершена. Треков: {download_count}.</b>")
-    except Exception as e:
-        await message.edit(f"❌ <b>Ошибка:</b> {e}")
+            await message.edit(f"✅ <b>Загрузка завершена. Треков: {download_count}.</b>")
+        except Exception as e:
+            await message.edit(f"❌ <b>Ошибка:</b> {e}")
