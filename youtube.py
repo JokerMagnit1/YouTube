@@ -88,3 +88,28 @@ class YouTubeToMP3Mod(loader.Module):
                     f"❌ <b>Ошибка:</b> число треков превышает количество видео в плейлисте ({total_videos})."
                 )
                 return
+
+            download_count = limit if limit else total_videos
+            await message.edit(f"⏳ <b>Загружаю {download_count} треков из плейлиста...</b>")
+
+            # Настройки для загрузки
+            ydl_opts.pop('extract_flat')
+            ydl_opts['playlistend'] = download_count
+
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
+
+            # Отправляем треки и удаляем
+            for file in os.listdir(output_path):
+                if file.endswith(".mp3"):
+                    await message.client.send_file(
+                        message.chat_id,
+                        f"{output_path}/{file}",
+                        caption=f"🎵 <b>Трек:</b> {file}",
+                        parse_mode="html"
+                    )
+                    os.remove(f"{output_path}/{file}")
+
+            await message.edit(f"✅ <b>Загрузка завершена. Треков: {download_count}.</b>")
+        except Exception as e:
+            await message.edit(f"❌ <b>Ошибка:</b> {e}")
